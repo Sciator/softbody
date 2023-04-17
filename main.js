@@ -98,10 +98,10 @@ function mousePressed() {
 
   const flatParticles = pathsParticles.flat();
 
-  const nearestParticles = flatParticles.filter(p => Math.sqrt((p.x - mouseX) ** 2 + (p.y - mouseY) ** 2) < 40);
+  const nearestParticles = flatParticles.filter(p => Math.sqrt((p.x - mouseX) ** 2 + (p.y - mouseY) ** 2) < 80);
 
   nearestParticles.forEach(p => {
-    if (Math.random() < .2) {
+    if (Math.random() < .1) {
       const spring = new VerletSpring2D(mouseDragParticle, p, dist(mouseDragParticle.x, mouseDragParticle.y, p.x, p.y), 0.005);
       physics.addSpring(spring);
       dragSprings.push(spring)
