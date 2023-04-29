@@ -1,10 +1,9 @@
-const { VerletPhysics2D, VerletParticle2D, VerletSpring2D } = toxi.physics2d;
-const { GravityBehavior } = toxi.physics2d.behaviors;
-const { Vec2D, Rect } = toxi.geom;
+const { VerletPhysics2D, VerletParticle2D, VerletSpring2D } = window.VerletPhysics;
+
 
 const POINTS_DIST = .4;
 const SPRING_PROBABILITY_LETTER = .03;
-const SPRING_PROBABILITY_TEXT = .0005;
+const SPRING_PROBABILITY_TEXT = .0002;
 const SPRING_STRENGTH_LETTER = 0.003;
 const SPRING_STRENGTH_TEXT = 0.001;
 const SPRING_STRENGTH_LETTER_SHELL = .2;
@@ -17,14 +16,14 @@ const renderParticle = (particle, r = 10) => {
   stroke("#bbaa00");
   fill("#ffaa00");
   strokeWeight(1);
-  circle(particle.x, particle.y, r);
+  circle(particle.position.x, particle.position.y, r);
   pop()
 };
 
 const renderSpring = (spring) => {
   strokeWeight(1);
   stroke("#0003");
-  line(spring.a.x, spring.a.y, spring.b.x, spring.b.y);
+  line(spring.particleA.position.x, spring.particleA.position.y, spring.particleB.position.x, spring.particleB.position.y);
 };
 
 
@@ -32,7 +31,6 @@ const renderSpring = (spring) => {
 let pathsParticles = [];
 let debugRender = false;
 let mouseDragParticle;
-let physics;
 
 let springsText = [];
 let springsShell = [];
@@ -46,8 +44,8 @@ function keyPressed() {
 
 function updateWindowSize() {
   resizeCanvas(windowWidth, windowHeight);
-  let bounds = new Rect(0, 0, width, height);
-  physics.setWorldBounds(bounds);
+  physics.constraint.x = windowWidth;
+  physics.constraint.y = windowHeight;
 };
 
 const SLIDER_POINTS_DIST = "SLIDER_POINTS_DIST";
@@ -72,26 +70,22 @@ const SLIDERS_NUMBER = [
 
 const SLIDERS_ID = [SLIDER_POINTS_DIST].concat(SLIDERS_NUMBER).concat(SLIDERS_STRENGTH);
 
+let physics = new window.VerletPhysics.VerletEngine2D();
+
 function setup() {
   createCanvas(1280, 720);
 
   createCustomSlider(SLIDER_SPRING_STRENGTH_LETTER, 0.0001, 0.02, SPRING_STRENGTH_LETTER, 0.0001, "SLIDER_SPRING_STRENGTH_LETTER")
   createCustomSlider(SLIDER_SPRING_STRENGTH_TEXT, 0.0001, 0.02, SPRING_STRENGTH_TEXT, 0.0001, "SLIDER_SPRING_STRENGTH_TEXT")
   createCustomSlider(SLIDER_SPRING_STRENGTH_LETTER_SHELL, 0.0001, 0.02, SPRING_STRENGTH_LETTER_SHELL, 0.0001, "SLIDER_SPRING_STRENGTH_LETTER_SHELL")
-  
+
   // createCustomSlider(SLIDER_POINTS_DIST, 0.02, 2, 1, 0.01)
 
   // createCustomSlider(SLIDER_SPRING_PROBABILITY_LETTER, 0.0001, 0.02, 0.0001, 0.0001, "SLIDER_SPRING_PROBABILITY_LETTER")
   // createCustomSlider(SLIDER_SPRING_PROBABILITY_TEXT, 0.0001, 0.02, 0.0001, 0.0001, "SLIDER_SPRING_PROBABILITY_TEXT")
   // createCustomSlider(SLIDER_SHELL_STEPS, 0.0001, 0.02, 0.0001, 0.0001, "SLIDER_SHELL_STEPS")
 
-  physics = new VerletPhysics2D();
-
-  const gravity = new GravityBehavior(new Vec2D(0, .1));
-  physics.addBehavior(gravity);
-
-  mouseDragParticle = new VerletParticle2D(0, 0);
-  physics.addParticle(mouseDragParticle);
+  mouseDragParticle = new VerletParticle2D(0,0);
 
   updateWindowSize();
 }
@@ -146,34 +140,36 @@ function randomInt(min, max) {
 }
 
 function mousePressed() {
-  mouseDragParticle.lock();
-  mouseDragParticle.x = mouseX;
-  mouseDragParticle.y = mouseY;
-  mouseDragParticle.unlock();
+  // mouseDragParticle.lock();
+  mouseDragParticle.position.x = mouseX;
+  mouseDragParticle.position.y = mouseY;
+  // mouseDragParticle.unlock();
 
   const flatParticles = pathsParticles.flat();
 
-  const nearestParticles = flatParticles.filter(p => Math.sqrt((p.x - mouseX) ** 2 + (p.y - mouseY) ** 2) < 80);
+  const nearestParticles = flatParticles.filter(p => Math.sqrt((p.position.x - mouseX) ** 2 + (p.position.y - mouseY) ** 2) < 80);
 
   for (let i = DRAG_POINTS; i-- && nearestParticles.length;) {
     const p = nearestParticles.splice(randomInt(nearestParticles.length), 1)[0];
-    const spring = new VerletSpring2D(mouseDragParticle, p, dist(mouseDragParticle.x, mouseDragParticle.y, p.x, p.y), 0.005);
-    physics.addSpring(spring);
+    // const spring = new VerletSpring2D(mouseDragParticle, p, dist(mouseDragParticle.x, mouseDragParticle.y, p.x, p.y), 0.005);
+    const spring = new VerletSpring2D(mouseDragParticle, p, 0.005);
+
+    physics.springs.push(spring);
     dragSprings.push(spring)
   }
 }
 
 function mouseReleased() {
-  dragSprings.splice(0).forEach(s => physics.removeSpring(s));
+  dragSprings.splice(0).forEach(s => physics.springs.splice(physics.springs.findIndex(x => x === s), 1));
 }
 
 let invalid = true;
 
 
 function applyStringStrengths() {
-  springsText.forEach(s => s.setStrength(getSliderValue(SLIDER_SPRING_STRENGTH_TEXT)));
-  springsShell.forEach(s => s.setStrength(getSliderValue(SLIDER_SPRING_STRENGTH_LETTER_SHELL)));
-  springsLetter.forEach(s => s.setStrength(getSliderValue(SLIDER_SPRING_STRENGTH_LETTER)));
+  springsText.forEach(s => s.stiffness = getSliderValue(SLIDER_SPRING_STRENGTH_TEXT)*30);
+  springsShell.forEach(s => s.stiffness = getSliderValue(SLIDER_SPRING_STRENGTH_LETTER_SHELL)*30);
+  springsLetter.forEach(s => s.stiffness = getSliderValue(SLIDER_SPRING_STRENGTH_LETTER)*30);
 }
 
 function initialize() {
@@ -196,20 +192,21 @@ function initialize() {
     const pathParticles = [];
     path.forEach(p => {
       const particle = new VerletParticle2D(p.x, p.y);
-      physics.addParticle(particle);
+      physics.particles.push(particle);
       pathParticles.push(particle);
     })
     pathsParticles.push(pathParticles);
   })
 
+  pathsParticles.flat().forEach(p => p.r = 0)
 
   for (pathParticles of pathsParticles) {
     for (let i = 0; i < pathParticles.length; i++) {
       range(1, SHELL_STEPS + 1).forEach(() => {
         let a = pathParticles[i];
         let b = pathParticles[(i + SHELL_STEPS) % pathParticles.length];
-        const spring = new VerletSpring2D(a, b, dist(a.x, a.y, b.x, b.y), SPRING_STRENGTH_LETTER_SHELL);
-        physics.addSpring(spring);
+        const spring = new VerletSpring2D(a, b, SPRING_STRENGTH_LETTER_SHELL);
+        physics.springs.push(spring);
         springsShell.push(spring)
       });
 
@@ -217,8 +214,8 @@ function initialize() {
         if (Math.random() < SPRING_PROBABILITY_LETTER) {
           let a = pathParticles[i];
           let b = pathParticles[j];
-          const spring = new VerletSpring2D(a, b, dist(a.x, a.y, b.x, b.y), SPRING_STRENGTH_LETTER);
-          physics.addSpring(spring);
+          const spring = new VerletSpring2D(a, b, SPRING_STRENGTH_LETTER);
+          physics.springs.push(spring);
           springsLetter.push(spring)
         }
       }
@@ -233,8 +230,8 @@ function initialize() {
           for (let j = i + 1; j < pathsParticles[l].length; j++) {
             const b = pathsParticles[l][j];
             if (Math.random() < SPRING_PROBABILITY_TEXT) {
-              const spring = new VerletSpring2D(a, b, dist(a.x, a.y, b.x, b.y), SPRING_STRENGTH_TEXT);
-              physics.addSpring(spring);
+              const spring = new VerletSpring2D(a, b, SPRING_STRENGTH_TEXT);
+              physics.springs.push(spring);
               springsText.push(spring)
             }
           }
@@ -242,6 +239,10 @@ function initialize() {
     }
   }
 }
+
+let lastFrameTime = Date.now();
+
+let maxDelta = 0;
 
 function draw() {
   if (invalid) {
@@ -253,22 +254,26 @@ function draw() {
   }
 
   if (
-    SLIDERS_STRENGTH.some(x=>getSliderChangedValue(x))
+    SLIDERS_STRENGTH.some(x => getSliderChangedValue(x))
   ) {
-    applyStringStrengths();
-    SLIDERS_STRENGTH.forEach(x=>resetSliderChanged(x))
+    applyStringStrengths()
+    SLIDERS_STRENGTH.forEach(x => resetSliderChanged(x))
   }
 
   background(255);
 
+  const now = Date.now()
+  const delta = now - lastFrameTime;
+  lastFrameTime = now;
+
+  physics.update(delta);
+
   push()
-    fill(0, 102, 153);
-  stroke(0,102,153)
+  fill(0, 102, 153);
+  stroke(0, 102, 153)
   strokeWeight(0)
   drawSliderLabels();
   pop()
-
-  physics.update();
 
   stroke(226, 38, 48, debugRender ? 120 : 255);
   fill(226, 38, 48, debugRender ? 120 : 255);
@@ -278,7 +283,7 @@ function draw() {
   for (let pathParticles of pathsParticles) {
     beginShape();
     for (let particle of pathParticles) {
-      vertex(particle.x, particle.y);
+      vertex(particle.position.x, particle.position.y);
     }
     endShape(CLOSE);
   }
@@ -286,16 +291,18 @@ function draw() {
   if (debugRender) {
     springsLetter.forEach(s => renderSpring(s))
     springsText.forEach(s => renderSpring(s))
-    // springsShell.forEach(s => renderSpring(s))
+    springsShell.forEach(s => renderSpring(s))
     dragSprings.forEach(s => renderSpring(s));
+
+    pathsParticles.flat().forEach(p => renderParticle(p))
 
     renderParticle(mouseDragParticle);
   }
 
   if (mouseIsPressed) {
-    mouseDragParticle.lock();
-    mouseDragParticle.x = mouseX;
-    mouseDragParticle.y = mouseY;
-    mouseDragParticle.unlock();
+    // mouseDragParticle.lock();
+    mouseDragParticle.position.x = mouseX;
+    mouseDragParticle.position.y = mouseY;
+    // mouseDragParticle.unlock();
   }
 }
