@@ -1,4 +1,12 @@
-const { VerletPhysics2D, VerletParticle2D, VerletSpring2D } = window.VerletPhysics;
+// @ts-check
+/// <reference path="./node_modules/@types/snapsvg/index.d.ts" />
+/// <reference path="./node_modules/@types/p5/global.d.ts" />
+import './libs/p5.min';
+
+import { VerletParticle2D, VerletSpring2D, VerletEngine2D } from "./VerletPhysics";
+
+import { createCustomSlider, drawSliderLabels, getSliderChangedValue, getSliderValue, resetSliderChanged } from "./sliders";
+
 
 
 const POINTS_DIST = .4;
@@ -70,9 +78,9 @@ const SLIDERS_NUMBER = [
 
 const SLIDERS_ID = [SLIDER_POINTS_DIST].concat(SLIDERS_NUMBER).concat(SLIDERS_STRENGTH);
 
-let physics = new window.VerletPhysics.VerletEngine2D();
+let physics = new VerletEngine2D();
 
-function setup() {
+window.setup = function setup() {
   createCanvas(1280, 720);
 
   createCustomSlider(SLIDER_SPRING_STRENGTH_LETTER, 0.0001, 0.02, SPRING_STRENGTH_LETTER, 0.0001, "SLIDER_SPRING_STRENGTH_LETTER")
@@ -139,7 +147,7 @@ function randomInt(min, max) {
   return Math.floor(min + (Math.random() * (max - min)));
 }
 
-function mousePressed() {
+window.mousePressed = function mousePressed() {
   // mouseDragParticle.lock();
   mouseDragParticle.position.x = mouseX;
   mouseDragParticle.position.y = mouseY;
@@ -159,7 +167,7 @@ function mousePressed() {
   }
 }
 
-function mouseReleased() {
+window.mouseReleased = function mouseReleased() {
   dragSprings.splice(0).forEach(s => physics.springs.splice(physics.springs.findIndex(x => x === s), 1));
 }
 
@@ -200,7 +208,7 @@ function initialize() {
 
   pathsParticles.flat().forEach(p => p.r = 0)
 
-  for (pathParticles of pathsParticles) {
+  for (const pathParticles of pathsParticles) {
     for (let i = 0; i < pathParticles.length; i++) {
       range(1, SHELL_STEPS + 1).forEach(() => {
         let a = pathParticles[i];
@@ -244,7 +252,7 @@ let lastFrameTime = Date.now();
 
 let maxDelta = 0;
 
-function draw() {
+window.draw = function draw() {
   if (invalid) {
     if (paths.length) {
       initialize();

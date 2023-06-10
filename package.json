@@ -9,6 +9,8 @@
     "preview": "vite preview"
   },
   "devDependencies": {
+    "@types/p5": "^1.6.2",
+    "@types/snapsvg": "^0.5.3",
     "vite": "^4.3.2"
   }
 }

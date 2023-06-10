@@ -1,9 +1,10 @@
+// @ts-check
 
 const sliders = {};
 const slidersLastValues = {};
-var drawSliderLabels = () =>{};
+export var drawSliderLabels = () =>{};
 
-function createCustomSlider(id, min, max, value, step, label) {
+export function createCustomSlider(id, min, max, value, step, label) {
   const index = Object.entries(sliders).length;
   const slider = createSlider(min, max, value, step);
   const posY = 20+ 18 * index;
@@ -20,19 +21,19 @@ function createCustomSlider(id, min, max, value, step, label) {
   sliders[id] = slider;
 }
 
-function getSliderValue(id) {
+export function getSliderValue(id) {
   const slider = sliders[id];
   const newValue = slider.value();
   
   return newValue;
 }
 
-function getSliderValueOld(id) {
+export function getSliderValueOld(id) {
   const oldValue = slidersLastValues[id];
   return oldValue;
 }
 
-function getSliderChangedValue(id) {
+export function getSliderChangedValue(id) {
   const newValue = getSliderValue(id);
   const oldValue = getSliderValueOld(id);
 
@@ -40,6 +41,6 @@ function getSliderChangedValue(id) {
   return newValue;
 }
 
-function resetSliderChanged(id) {
+export function resetSliderChanged(id) {
   slidersLastValues[id] = getSliderValue(id);
 }
