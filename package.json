@@ -10,7 +10,8 @@
     "build": "yarn build:wasm && vite build",
     "preview": "vite preview",
     "build:wasm": "wasm-pack build",
-    "postinstall": "cargo install cargo-watch"
+    "postinstall": "cargo build",
+    "install:dev": "cargo install cargo-watch"
   },
   "devDependencies": {
     "@types/p5": "^1.6.2",
