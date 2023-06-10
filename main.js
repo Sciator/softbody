@@ -1,13 +1,13 @@
 // @ts-check
 /// <reference path="./node_modules/@types/snapsvg/index.d.ts" />
 /// <reference path="./node_modules/@types/p5/global.d.ts" />
-import './libs/p5.min';
+import './libs/p5.min.js';
 
-import { VerletParticle2D, VerletSpring2D, VerletEngine2D } from "./VerletPhysics";
+import { VerletParticle2D, VerletSpring2D, VerletEngine2D } from "./VerletPhysics.js";
 
-import { createCustomSlider, drawSliderLabels, getSliderChangedValue, getSliderValue, resetSliderChanged } from "./sliders";
+import { createCustomSlider, drawSliderLabels, getSliderChangedValue, getSliderValue, resetSliderChanged } from "./sliders.js";
 
-import * as rs from "./pkg/softbody";
+import * as rs from "./pkg/softbody.js";
 
 rs.greet();
 

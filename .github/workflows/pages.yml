@@ -50,7 +50,7 @@ jobs:
         with:
           # Upload entire repository
           path: |
-            '.'
+            .
             !**/node_modules
       - name: Deploy to GitHub Pages
         id: deployment
