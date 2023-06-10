@@ -4,13 +4,21 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
+    "dev": "run-p dev:vite dev:wasm",
+    "dev:wasm": "cargo watch -s \"wasm-pack build\" -w ./src",
+    "dev:vite": "vite",
+    "build": "yarn build:wasm && vite build",
+    "preview": "vite preview",
+    "build:wasm": "wasm-pack build",
+    "postinstall": "cargo install cargo-watch"
   },
   "devDependencies": {
     "@types/p5": "^1.6.2",
     "@types/snapsvg": "^0.5.3",
-    "vite": "^4.3.2"
+    "npm-run-all": "^4.1.5",
+    "vite": "^4.3.2",
+    "vite-plugin-top-level-await": "^1.3.1",
+    "vite-plugin-wasm": "^3.2.2",
+    "wasm-pack": "^0.11.1"
   }
 }

@@ -7,6 +7,21 @@ import { VerletParticle2D, VerletSpring2D, VerletEngine2D } from "./VerletPhysic
 
 import { createCustomSlider, drawSliderLabels, getSliderChangedValue, getSliderValue, resetSliderChanged } from "./sliders";
 
+import * as rs from "./pkg/softbody";
+
+rs.greet();
+
+const counter = new rs.Counter();
+
+console.log(counter.get_count());
+counter.increment();
+console.log(counter.get_count());
+counter.increment();
+console.log(counter.get_count());
+counter.increment();
+console.log(counter.get_count());
+counter.increment();
+console.log(counter.get_count());
 
 
 const POINTS_DIST = .4;
