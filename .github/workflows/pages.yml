@@ -20,22 +20,18 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-
-      - name: Cache Yarn dependencies
-        uses: actions/cache@v2
+      - uses: actions/setup-node@v3
         with:
-          path: ~/.yarn
-          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-yarn-
+          node-version: '18'
+          cache: 'yarn'
 
-      - name: Cache Cargo dependencies
-        uses: actions/cache@v2
+      - uses: actions/cache@v2
         with:
-          path: ${{ env.HOME }}/.cargo
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-cargo-
 
       - name: Install dependencies
         run: yarn install
@@ -43,15 +39,16 @@ jobs:
       - name: build
         run: yarn build:wasm
 
+      - name: clear node_modeules
+        run: rm -rf node_modules
+
       - name: Setup Pages
         uses: actions/configure-pages@v3
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
         with:
           # Upload entire repository
-          path: |
-            .
-            !**/node_modules
+          path: '.'
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v2
