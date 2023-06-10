@@ -5,11 +5,11 @@
   "type": "module",
   "scripts": {
     "dev": "run-p dev:vite dev:wasm",
-    "dev:wasm": "cargo watch -s \"wasm-pack build\" -w ./src",
+    "dev:wasm": "cargo watch -s \"wasm-pack build --target web\" -w ./src",
     "dev:vite": "vite",
     "build": "yarn build:wasm && vite build",
     "preview": "vite preview",
-    "build:wasm": "wasm-pack build",
+    "build:wasm": "wasm-pack build --target web",
     "postinstall": "cargo build",
     "install:dev": "cargo install cargo-watch"
   },
